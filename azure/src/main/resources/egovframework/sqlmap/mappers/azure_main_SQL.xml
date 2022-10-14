@@ -1,0 +1,913 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="azureDAO">
+
+	<select id="azureMainResourceType" parameterType="java.util.Map" resultType="egovMap">
+		select * from
+		<if test="customerName == 'sldt'">
+			sldt.resource_type
+		</if>
+		<if test="customerName == 'autoever'">
+			autoever.resource_type
+		</if>
+		<if test="customerName == 'doopedia'">
+			doopedia.resource_type
+		</if>
+		<if test="customerName == 'fsec'">
+			fsec.resource_type
+		</if>
+		<if test="customerName == 'kbhealth'">
+			kbhealth.resource_type
+		</if>
+		 ORDER BY resource_type
+	</select>
+	
+	<select id="azureMainResourceGroup" parameterType="java.util.Map" resultType="egovMap">
+		select DISTINCT resource_group from
+		<if test="customerName == 'sldt'">
+			sldt.resource
+		</if>
+		<if test="customerName == 'autoever'">
+			autoever.resource
+		</if>
+		<if test="customerName == 'doopedia'">
+			doopedia.resource
+		</if>
+		<if test="customerName == 'fsec'">
+			fsec.resource
+		</if>
+		<if test="customerName == 'kbhealth'">
+			kbhealth.resource
+		</if>
+		where resource_type = #{resourceTypeValue}
+		ORDER BY resource_group
+	</select>
+	
+	<select id="azureMainResource" parameterType="java.util.Map" resultType="egovMap">
+		select * from
+		<if test="customerName == 'sldt'">
+			sldt.resource
+		</if>
+		<if test="customerName == 'autoever'">
+			autoever.resource
+		</if>
+		<if test="customerName == 'doopedia'">
+			doopedia.resource
+		</if>
+		<if test="customerName == 'fsec'">
+			fsec.resource
+		</if>
+		<if test="customerName == 'kbhealth'">
+			kbhealth.resource
+		</if>
+		where resource_type = #{resourceTypeValue}
+		ORDER BY resource_name
+	</select>
+	
+	<select id="azureMainMetriceCnt" parameterType="java.util.Map" resultType="egovMap">
+		SELECT DATE, COUNT(DATE) as cnt  FROM (
+			SELECT NO, DATE_FORMAT(DATE,'%Y-%m-%d') AS date FROM
+				<if test="customerName == 'sldt'">
+					sldt.event_total
+				</if>
+				<if test="customerName == 'autoever'">
+					autoever.event_total
+				</if>
+				<if test="customerName == 'doopedia'">
+					doopedia.event_total
+				</if>
+				<if test="customerName == 'fsec'">
+					fsec.event_total
+				</if>
+				<if test="customerName == 'kbhealth'">
+					kbhealth.event_total
+				</if>
+		
+				where event_type = 'Prometheus'
+		
+				<if test="FilterTitleValue == 'Weekly'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 WEEK ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == 'Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '3 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -3 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '6 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -6 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+		
+				<if test="resourceTypeValue != null and resourceTypeValue != ''">
+				and resource_type = #{resourceTypeValue}
+				</if>
+				<if test="resourceGroupValue != null and resourceGroupValue != ''">
+				and resource_group = #{resourceGroupValue}
+				</if>
+				<if test="resourceValue != null and resourceValue != ''">
+				and resource_name = #{resourceValue}
+				</if>
+		) c GROUP BY DATE
+	</select>
+	
+	<select id="azureMainMetriceRealTimeCnt" parameterType="java.util.Map" resultType="int">
+		select count(event_type) from
+		<if test="customerName == 'sldt'">
+			sldt.event_total
+		</if>
+		<if test="customerName == 'autoever'">
+			autoever.event_total
+		</if>
+		<if test="customerName == 'doopedia'">
+			doopedia.event_total
+		</if>
+		<if test="customerName == 'fsec'">
+			fsec.event_total
+		</if>
+		<if test="customerName == 'kbhealth'">
+			kbhealth.event_total
+		</if>
+		
+		where event_type = 'Prometheus'
+		
+		and DATE_FORMAT(DATE,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')
+		
+		<if test="resourceTypeValue != null and resourceTypeValue != ''">
+		and resource_type = #{resourceTypeValue}
+		</if>
+		<if test="resourceGroupValue != null and resourceGroupValue != ''">
+		and resource_group = #{resourceGroupValue}
+		</if>
+		<if test="resourceValue != null and resourceValue != ''">
+		and resource_name = #{resourceValue}
+		</if>
+	</select>
+		
+	<select id="azureMainLogsCnt" parameterType="java.util.Map" resultType="egovMap">
+		SELECT DATE, COUNT(DATE) as cnt  FROM (
+			SELECT NO, DATE_FORMAT(DATE,'%Y-%m-%d') AS date FROM
+				<if test="customerName == 'sldt'">
+					sldt.event_total
+				</if>
+				<if test="customerName == 'autoever'">
+					autoever.event_total
+				</if>
+				<if test="customerName == 'doopedia'">
+					doopedia.event_total
+				</if>
+				<if test="customerName == 'fsec'">
+					fsec.event_total
+				</if>
+				<if test="customerName == 'kbhealth'">
+					kbhealth.event_total
+				</if>
+		
+				where event_type = 'Logs'
+		
+				<if test="FilterTitleValue == 'Weekly'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 WEEK ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == 'Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '3 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -3 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '6 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -6 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+		
+				<if test="resourceTypeValue != null and resourceTypeValue != ''">
+				and resource_type = #{resourceTypeValue}
+				</if>
+				<if test="resourceGroupValue != null and resourceGroupValue != ''">
+				and resource_group = #{resourceGroupValue}
+				</if>
+				<if test="resourceValue != null and resourceValue != ''">
+				and resource_name = #{resourceValue}
+				</if>
+		) c GROUP BY DATE
+	</select>
+	
+	<select id="azureMainLogsRealTimeCnt" parameterType="java.util.Map" resultType="int">
+		select count(event_type) from
+		<if test="customerName == 'sldt'">
+			sldt.event_total
+		</if>
+		<if test="customerName == 'autoever'">
+			autoever.event_total
+		</if>
+		<if test="customerName == 'doopedia'">
+			doopedia.event_total
+		</if>
+		<if test="customerName == 'fsec'">
+			fsec.event_total
+		</if>
+		<if test="customerName == 'kbhealth'">
+			kbhealth.event_total
+		</if>
+		
+		where event_type = 'Logs'
+		
+		and DATE_FORMAT(DATE,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')
+		
+		<if test="resourceTypeValue != null and resourceTypeValue != ''">
+		and resource_type = #{resourceTypeValue}
+		</if>
+		<if test="resourceGroupValue != null and resourceGroupValue != ''">
+		and resource_group = #{resourceGroupValue}
+		</if>
+		<if test="resourceValue != null and resourceValue != ''">
+		and resource_name = #{resourceValue}
+		</if>
+	</select>
+	
+	<select id="azureMainActivityCnt" parameterType="java.util.Map" resultType="egovMap">
+		SELECT DATE, COUNT(DATE) as cnt  FROM (
+			SELECT NO, DATE_FORMAT(DATE,'%Y-%m-%d') AS date FROM
+				<if test="customerName == 'sldt'">
+					sldt.event_total
+				</if>
+				<if test="customerName == 'autoever'">
+					autoever.event_total
+				</if>
+				<if test="customerName == 'doopedia'">
+					doopedia.event_total
+				</if>
+				<if test="customerName == 'fsec'">
+					fsec.event_total
+				</if>
+				<if test="customerName == 'kbhealth'">
+					kbhealth.event_total
+				</if>
+		
+				where event_type = 'ActivityLog'
+		
+				<if test="FilterTitleValue == 'Weekly'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 WEEK ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == 'Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '3 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -3 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '6 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -6 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+		
+				<if test="resourceTypeValue != null and resourceTypeValue != ''">
+				and resource_type = #{resourceTypeValue}
+				</if>
+				<if test="resourceGroupValue != null and resourceGroupValue != ''">
+				and resource_group = #{resourceGroupValue}
+				</if>
+				<if test="resourceValue != null and resourceValue != ''">
+				and resource_name = #{resourceValue}
+				</if>
+		) c GROUP BY DATE
+	</select>
+	
+	<select id="azureMainActivityRealTimeCnt" parameterType="java.util.Map" resultType="int">
+		select count(event_type) from
+		<if test="customerName == 'sldt'">
+			sldt.event_total
+		</if>
+		<if test="customerName == 'autoever'">
+			autoever.event_total
+		</if>
+		<if test="customerName == 'doopedia'">
+			doopedia.event_total
+		</if>
+		<if test="customerName == 'fsec'">
+			fsec.event_total
+		</if>
+		<if test="customerName == 'kbhealth'">
+			kbhealth.event_total
+		</if>
+		
+		where event_type = 'ActivityLog'
+		
+		and DATE_FORMAT(DATE,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')
+		
+		<if test="resourceTypeValue != null and resourceTypeValue != ''">
+		and resource_type = #{resourceTypeValue}
+		</if>
+		<if test="resourceGroupValue != null and resourceGroupValue != ''">
+		and resource_group = #{resourceGroupValue}
+		</if>
+		<if test="resourceValue != null and resourceValue != ''">
+		and resource_name = #{resourceValue}
+		</if>
+	</select>
+	
+	<select id="azureMainResourceCnt" parameterType="java.util.Map" resultType="egovMap">
+		SELECT DATE, COUNT(DATE) as cnt  FROM (
+			SELECT NO, DATE_FORMAT(DATE,'%Y-%m-%d') AS date FROM
+				<if test="customerName == 'sldt'">
+					sldt.event_total
+				</if>
+				<if test="customerName == 'autoever'">
+					autoever.event_total
+				</if>
+				<if test="customerName == 'doopedia'">
+					doopedia.event_total
+				</if>
+				<if test="customerName == 'fsec'">
+					fsec.event_total
+				</if>
+				<if test="customerName == 'kbhealth'">
+					kbhealth.event_total
+				</if>
+		
+				where event_type = 'Azure API'
+		
+				<if test="FilterTitleValue == 'Weekly'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 WEEK ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == 'Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '3 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -3 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '6 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -6 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+		
+				<if test="resourceTypeValue != null and resourceTypeValue != ''">
+				and resource_type = #{resourceTypeValue}
+				</if>
+				<if test="resourceGroupValue != null and resourceGroupValue != ''">
+				and resource_group = #{resourceGroupValue}
+				</if>
+				<if test="resourceValue != null and resourceValue != ''">
+				and resource_name = #{resourceValue}
+				</if>
+		) c GROUP BY DATE
+	</select>
+	
+	<select id="azureMainResourceTypeCnt" parameterType="java.util.Map" resultType="egovMap">
+		SELECT COUNT(resource_type) as cnt, resource_type  FROM (
+			SELECT resource_type FROM
+				<if test="customerName == 'sldt'">
+					sldt.event_total
+				</if>
+				<if test="customerName == 'autoever'">
+					autoever.event_total
+				</if>
+				<if test="customerName == 'doopedia'">
+					doopedia.event_total
+				</if>
+				<if test="customerName == 'fsec'">
+					fsec.event_total
+				</if>
+				<if test="customerName == 'kbhealth'">
+					kbhealth.event_total
+				</if>
+		
+				where 1 = 1
+		
+				<if test="FilterTitleValue == 'Weekly'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 WEEK ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == 'Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '3 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -3 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '6 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -6 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+		
+				<if test="resourceTypeValue != null and resourceTypeValue != ''">
+				and resource_type = #{resourceTypeValue}
+				</if>
+				<if test="resourceGroupValue != null and resourceGroupValue != ''">
+				and resource_group = #{resourceGroupValue}
+				</if>
+				<if test="resourceValue != null and resourceValue != ''">
+				and resource_name = #{resourceValue}
+				</if>
+		) c GROUP BY resource_type
+	</select>
+	
+	<select id="azureMainResourceRealTimeCnt" parameterType="java.util.Map" resultType="int">
+		select count(event_type) from
+		<if test="customerName == 'sldt'">
+			sldt.event_total
+		</if>
+		<if test="customerName == 'autoever'">
+			autoever.event_total
+		</if>
+		<if test="customerName == 'doopedia'">
+			doopedia.event_total
+		</if>
+		<if test="customerName == 'fsec'">
+			fsec.event_total
+		</if>
+		<if test="customerName == 'kbhealth'">
+			kbhealth.event_total
+		</if>
+		
+		where event_type = 'Azure API'
+		
+		and DATE_FORMAT(DATE,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')
+		
+		<if test="resourceTypeValue != null and resourceTypeValue != ''">
+		and resource_type = #{resourceTypeValue}
+		</if>
+		<if test="resourceGroupValue != null and resourceGroupValue != ''">
+		and resource_group = #{resourceGroupValue}
+		</if>
+		<if test="resourceValue != null and resourceValue != ''">
+		and resource_name = #{resourceValue}
+		</if>
+	</select>
+	
+	<select id="azureMainServiceCnt" parameterType="java.util.Map" resultType="egovMap">
+		SELECT DATE, COUNT(DATE) as cnt  FROM (
+			SELECT NO, DATE_FORMAT(DATE,'%Y-%m-%d') AS date FROM
+				<if test="customerName == 'sldt'">
+					sldt.event_total
+				</if>
+				<if test="customerName == 'autoever'">
+					autoever.event_total
+				</if>
+				<if test="customerName == 'doopedia'">
+					doopedia.event_total
+				</if>
+				<if test="customerName == 'fsec'">
+					fsec.event_total
+				</if>
+				<if test="customerName == 'kbhealth'">
+					kbhealth.event_total
+				</if>
+		
+				where event_type = 'ServiceHealth'
+		
+				<if test="FilterTitleValue == 'Weekly'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 WEEK ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == 'Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '3 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -3 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '6 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -6 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+		
+				<if test="resourceTypeValue != null and resourceTypeValue != ''">
+				and resource_type = #{resourceTypeValue}
+				</if>
+				<if test="resourceGroupValue != null and resourceGroupValue != ''">
+				and resource_group = #{resourceGroupValue}
+				</if>
+				<if test="resourceValue != null and resourceValue != ''">
+				and resource_name = #{resourceValue}
+				</if>
+		) c GROUP BY DATE
+	</select>
+	
+	<select id="azureMainServiceRealTimeCnt" parameterType="java.util.Map" resultType="int">
+		select count(event_type) from
+		<if test="customerName == 'sldt'">
+			sldt.event_total
+		</if>
+		<if test="customerName == 'autoever'">
+			autoever.event_total
+		</if>
+		<if test="customerName == 'doopedia'">
+			doopedia.event_total
+		</if>
+		<if test="customerName == 'fsec'">
+			fsec.event_total
+		</if>
+		<if test="customerName == 'kbhealth'">
+			kbhealth.event_total
+		</if>
+		
+		where event_type = 'ServiceHealth'
+		
+		and DATE_FORMAT(DATE,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')
+		
+		<if test="resourceTypeValue != null and resourceTypeValue != ''">
+		and resource_type = #{resourceTypeValue}
+		</if>
+		<if test="resourceGroupValue != null and resourceGroupValue != ''">
+		and resource_group = #{resourceGroupValue}
+		</if>
+		<if test="resourceValue != null and resourceValue != ''">
+		and resource_name = #{resourceValue}
+		</if>
+	</select>
+	
+	<select id="azureMainRealChartList" parameterType="java.util.Map" resultType="egovMap">
+		select resource_type, resource_group, resource_name, status_info, DATE_FORMAT(DATE,'%Y-%m-%d %h:%i') date from
+		<if test="customerName == 'sldt'">
+			sldt.event_total
+		</if>
+		<if test="customerName == 'autoever'">
+			autoever.event_total
+		</if>
+		<if test="customerName == 'doopedia'">
+			doopedia.event_total
+		</if>
+		<if test="customerName == 'fsec'">
+			fsec.event_total
+		</if>
+		<if test="customerName == 'kbhealth'">
+			kbhealth.event_total
+		</if>
+		
+		where 
+		
+		<if test="eventType == 'Metrics'">
+			event_type = 'Prometheus'
+		</if>
+		<if test="eventType == 'Logs'">
+			event_type = 'Logs'
+		</if>
+		<if test="eventType == 'Activity log'">
+			event_type = 'ActivityLog'
+		</if>
+		<if test="eventType == 'Resource health'">
+			event_type = 'Azure API'
+		</if>
+		<if test="eventType == 'service health'">
+			event_type = 'ServiceHealth'
+		</if>
+		
+		and DATE_FORMAT(DATE,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')
+		
+		<if test="resourceTypeValue != null and resourceTypeValue != ''">
+		and resource_type = #{resourceTypeValue}
+		</if>
+		<if test="resourceGroupValue != null and resourceGroupValue != ''">
+		and resource_group = #{resourceGroupValue}
+		</if>
+		<if test="resourceValue != null and resourceValue != ''">
+		and resource_name = #{resourceValue}
+		</if>
+		ORDER BY DATE DESC
+	</select>
+	
+	<select id="azureMainLineChartList" parameterType="java.util.Map" resultType="egovMap">
+		select resource_type, resource_group, resource_name, status_info, DATE_FORMAT(DATE,'%Y-%m-%d %h:%i') date from
+		<if test="customerName == 'sldt'">
+			sldt.event_total
+		</if>
+		<if test="customerName == 'autoever'">
+			autoever.event_total
+		</if>
+		<if test="customerName == 'doopedia'">
+			doopedia.event_total
+		</if>
+		<if test="customerName == 'fsec'">
+			fsec.event_total
+		</if>
+		<if test="customerName == 'kbhealth'">
+			kbhealth.event_total
+		</if>
+		
+		where 
+		
+		<if test="eventType == 'Metrics'">
+			event_type = 'Prometheus'
+		</if>
+		<if test="eventType == 'Logs'">
+			event_type = 'Logs'
+		</if>
+		<if test="eventType == 'Activity log'">
+			event_type = 'ActivityLog'
+		</if>
+		<if test="eventType == 'Resource health'">
+			event_type = 'Azure API'
+		</if>
+		<if test="eventType == 'service health'">
+			event_type = 'ServiceHealth'
+		</if>
+		
+		and DATE_FORMAT(DATE,'%Y-%m-%d') = DATE_FORMAT(#{day},'%Y-%m-%d')
+		
+		<if test="resourceTypeValue != null and resourceTypeValue != ''">
+		and resource_type = #{resourceTypeValue}
+		</if>
+		<if test="resourceGroupValue != null and resourceGroupValue != ''">
+		and resource_group = #{resourceGroupValue}
+		</if>
+		<if test="resourceValue != null and resourceValue != ''">
+		and resource_name = #{resourceValue}
+		</if>
+		ORDER BY DATE DESC
+	</select>
+	
+	<select id="azureMainPieChartList" parameterType="java.util.Map" resultType="egovMap">
+		SELECT resource_type, resource_group, resource_name, status_info, DATE_FORMAT(DATE,'%Y-%m-%d %h:%i') date from
+		<if test="customerName == 'sldt'">
+			sldt.event_total
+		</if>
+		<if test="customerName == 'autoever'">
+			autoever.event_total
+		</if>
+		<if test="customerName == 'doopedia'">
+			doopedia.event_total
+		</if>
+		<if test="customerName == 'fsec'">
+			fsec.event_total
+		</if>
+		<if test="customerName == 'kbhealth'">
+			kbhealth.event_total
+		</if>
+		
+		where resource_type = #{resourceType}
+		
+		<if test="FilterTitleValue == 'Weekly'">
+		and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 WEEK ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+		</if>
+		<if test="FilterTitleValue == 'Month'">
+		and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+		</if>
+		<if test="FilterTitleValue == '3 Month'">
+		and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -3 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+		</if>
+		<if test="FilterTitleValue == '6 Month'">
+		and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -6 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+		</if>
+		
+		<if test="resourceTypeValue != null and resourceTypeValue != ''">
+		and resource_type = #{resourceTypeValue}
+		</if>
+		<if test="resourceGroupValue != null and resourceGroupValue != ''">
+		and resource_group = #{resourceGroupValue}
+		</if>
+		<if test="resourceValue != null and resourceValue != ''">
+		and resource_name = #{resourceValue}
+		</if>
+		ORDER BY DATE DESC
+	</select>
+	
+	<select id="azureAllEventListCnt" parameterType="java.util.Map" resultType="egovMap">
+		SELECT DATE, COUNT(DATE) as cnt  FROM (
+			SELECT NO, DATE_FORMAT(DATE,'%Y-%m-%d') AS date FROM
+				<if test="customerName == 'sldt'">
+					sldt.event_total
+				</if>
+				<if test="customerName == 'autoever'">
+					autoever.event_total
+				</if>
+				<if test="customerName == 'doopedia'">
+					doopedia.event_total
+				</if>
+				<if test="customerName == 'fsec'">
+					fsec.event_total
+				</if>
+				<if test="customerName == 'kbhealth'">
+					kbhealth.event_total
+				</if>
+		
+				where 1=1
+				<if test="FilterTitleValue == 'Weekly'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 WEEK ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == 'Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '3 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -3 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '6 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -6 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+		
+				<!-- <if test="resourceTypeValue != null and resourceTypeValue != ''">
+				and resource_type = #{resourceTypeValue}
+				</if>
+				<if test="resourceGroupValue != null and resourceGroupValue != ''">
+				and resource_group = #{resourceGroupValue}
+				</if>
+				<if test="resourceValue != null and resourceValue != ''">
+				and resource_name = #{resourceValue}
+				</if> -->
+		) c GROUP BY DATE
+	</select>
+	
+	<select id="azureEventTopList" parameterType="java.util.Map" resultType="egovMap">
+		SELECT resource_group, resource_type, resource_name, status_info, COUNT(status_info) cnt  FROM (
+			SELECT * FROM
+				<if test="customerName == 'sldt'">
+					sldt.event_total
+				</if>
+				<if test="customerName == 'autoever'">
+					autoever.event_total
+				</if>
+				<if test="customerName == 'doopedia'">
+					doopedia.event_total
+				</if>
+				<if test="customerName == 'fsec'">
+					fsec.event_total
+				</if>
+				<if test="customerName == 'kbhealth'">
+					kbhealth.event_total
+				</if>
+		
+				where event_type != 'ServiceHealth'
+				<if test="FilterTitleValue == 'Weekly'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 WEEK ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == 'Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '3 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -3 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '6 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -6 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+		
+				<!-- <if test="resourceTypeValue != null and resourceTypeValue != ''">
+				and resource_type = #{resourceTypeValue}
+				</if>
+				<if test="resourceGroupValue != null and resourceGroupValue != ''">
+				and resource_group = #{resourceGroupValue}
+				</if>
+				<if test="resourceValue != null and resourceValue != ''">
+				and resource_name = #{resourceValue}
+				</if> -->
+		) c GROUP BY resource_group, resource_name, resource_type, status_info ORDER BY cnt DESC LIMIT 5
+	</select>
+	
+	<select id="azureServiceHealthEventTopList" parameterType="java.util.Map" resultType="egovMap">
+		SELECT status_info, region, COUNT(status_info) cnt FROM (
+			SELECT * FROM
+				<if test="customerName == 'sldt'">
+					sldt.event_total
+				</if>
+				<if test="customerName == 'autoever'">
+					autoever.event_total
+				</if>
+				<if test="customerName == 'doopedia'">
+					doopedia.event_total
+				</if>
+				<if test="customerName == 'fsec'">
+					fsec.event_total
+				</if>
+				<if test="customerName == 'kbhealth'">
+					kbhealth.event_total
+				</if>
+		
+				where event_type = 'ServiceHealth'
+				<if test="FilterTitleValue == 'Weekly'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 WEEK ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == 'Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '3 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -3 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '6 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -6 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+		
+				<!-- <if test="resourceTypeValue != null and resourceTypeValue != ''">
+				and resource_type = #{resourceTypeValue}
+				</if>
+				<if test="resourceGroupValue != null and resourceGroupValue != ''">
+				and resource_group = #{resourceGroupValue}
+				</if>
+				<if test="resourceValue != null and resourceValue != ''">
+				and resource_name = #{resourceValue}
+				</if> -->
+		) c GROUP BY status_info, region ORDER BY cnt DESC LIMIT 5
+	</select>
+	
+	<select id="azureRegionEventTopList" parameterType="java.util.Map" resultType="egovMap">
+		SELECT region, COUNT(status_info) cnt FROM (
+			SELECT * FROM
+				<if test="customerName == 'sldt'">
+					sldt.event_total
+				</if>
+				<if test="customerName == 'autoever'">
+					autoever.event_total
+				</if>
+				<if test="customerName == 'doopedia'">
+					doopedia.event_total
+				</if>
+				<if test="customerName == 'fsec'">
+					fsec.event_total
+				</if>
+				<if test="customerName == 'kbhealth'">
+					kbhealth.event_total
+				</if>
+		
+				where event_type = 'ServiceHealth'
+				<if test="FilterTitleValue == 'Weekly'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 WEEK ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == 'Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '3 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -3 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+				<if test="FilterTitleValue == '6 Month'">
+				and DATE_FORMAT(DATE,'%Y-%m-%d') BETWEEN DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -6 MONTH ) AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'), INTERVAL -1 day )
+				</if>
+		
+				<!-- <if test="resourceTypeValue != null and resourceTypeValue != ''">
+				and resource_type = #{resourceTypeValue}
+				</if>
+				<if test="resourceGroupValue != null and resourceGroupValue != ''">
+				and resource_group = #{resourceGroupValue}
+				</if>
+				<if test="resourceValue != null and resourceValue != ''">
+				and resource_name = #{resourceValue}
+				</if> -->
+		) c GROUP BY region ORDER BY cnt DESC LIMIT 7
+	</select>
+
+	<insert id="insertSample" parameterType="egovMap">
+
+			INSERT INTO SAMPLE
+				( ID
+				  , NAME
+				  , DESCRIPTION
+				  , USE_YN
+				  , REG_USER )
+			VALUES ( #{id}
+				  , #{name}
+				  , #{description}
+				  , #{useYn}
+				  , #{regUser} )
+
+	</insert>
+
+	<update id="updateSample">
+
+			UPDATE SAMPLE
+			SET ID=#{id}
+				, NAME=#{name}
+				, DESCRIPTION=#{description}
+				, USE_YN=#{useYn}
+				  WHERE ID=#{id}
+
+	</update>
+
+	<delete id="deleteSample">
+
+			DELETE FROM SAMPLE
+			WHERE ID=#{id}
+
+	</delete>
+
+	<select id="selectSample" resultType="egovMap">
+
+			SELECT
+				ID, NAME, DESCRIPTION, USE_YN, REG_USER
+			FROM SAMPLE
+			WHERE ID=#{id}
+
+	</select>
+
+	<select id="selectSampleList" parameterType="java.util.Map" resultType="egovMap">
+
+			SELECT
+				ID, NAME, DESCRIPTION, USE_YN, REG_USER
+			FROM SAMPLE
+			WHERE 1=1
+			<if test="searchKeyword != null and searchKeyword != ''">
+		        <choose>
+		            <when test="searchCondition == 0">
+						AND	ID LIKE '%' || #{searchKeyword} || '%'
+					</when>
+		            <when test="searchCondition == 1">
+						AND	NAME LIKE '%' || #{searchKeyword} || '%'
+					</when>
+				</choose>
+			</if>
+			ORDER BY ID ASC
+			LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+	</select>
+
+	<select id="selectSampleListTotCnt" parameterType="java.util.Map" resultType="int">
+
+			SELECT COUNT(*) totcnt
+			FROM SAMPLE
+			WHERE 1=1
+			<if test="searchKeyword != null and searchKeyword != ''">
+		        <choose>
+		            <when test="searchCondition == 0">
+						AND ID LIKE '%' || #{searchKeyword} || '%'
+					</when>
+		            <when test="searchCondition == 1">
+						AND	NAME LIKE '%' || #{searchKeyword} || '%'
+					</when>
+				</choose>
+			</if>
+	</select>
+
+</mapper>
